@@ -1,0 +1,24 @@
+UI: 
+    Some examples in google drive folder.
+    Necessary:
+        A mainpage
+            -Choose settings, and such.
+        A chat "room"
+            -Stop and Next buttons
+
+Chatting:
+    Chat via sockets.
+    some examples:
+        -http://docs.oracle.com/javase/tutorial/networking/sockets/readingWriting.html
+        -https://developer.android.com/reference/java/net/Socket.html
+    
+    Finding a match:
+        Maybe server needed?   
+            -When starting to chat, check list for a match(from start to end), if a match is found: start chatting, else: Put self last in list.
+            -Delete from list when match is found or when Stop is clicked.
+
+
+Settings:
+    Set Distance
+    *Set interests?(Sports, Politics, Movies, Music, etc.)
+    *Talk to people in specific area/allow people targeting my area
