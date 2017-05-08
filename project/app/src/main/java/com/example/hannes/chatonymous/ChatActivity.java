@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Created by hannes on 5/7/17.
@@ -28,7 +29,8 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     PrintWriter out;
     Handler messageHandler;
-    int serverPort;
+    static final int PORT = 10001;
+    static final String SERVER_IP = "10.0.0.6";
     TextView messageBoard;
 
     @Override
@@ -37,7 +39,9 @@ public class ChatActivity extends Activity {
         setContentView(R.layout.activity_chat);
         messageBoard = (TextView) findViewById(R.id.message_board);
         messageHandler = new Handler();
-        new ServerThread().start();
+        //new ServerThread().start();
+        new ConnectionThread().start();
+
 
     }
 
@@ -51,38 +55,63 @@ public class ChatActivity extends Activity {
         }
     }
 
+    class ConnectionThread extends Thread {
+        Socket socket;
+        @Override
+        public void run() {
+            super.run();
+            String ip = null;
+            socket = connectToSocket(SERVER_IP, PORT);
+
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                Log.d(LOG_TAG, InetAddress.getLocalHost().getHostAddress());
+                out.println(InetAddress.getLocalHost().getHostAddress());
+                ip = in.readLine();
+                Log.d(LOG_TAG, "|"+ip+"|");
+            } catch (IOException e){
+                e.printStackTrace();
+                Log.e(LOG_TAG, "error in writing/reading.");
+            }
+            if (ip != null){
+                Log.d(LOG_TAG, "got connection address!");
+                new ClientThread(ip, PORT).start();
+            }else {
+                new ServerThread().start();
+                Log.d(LOG_TAG, "Added to queue, wating for connection...");
+            }
+        }
+    }
+
     class ServerThread extends Thread{
         @Override
         public void run() {
             super.run();
-            serverPort = 10001;
             try {
-                serverSocket = new ServerSocket(serverPort);
+                serverSocket = new ServerSocket(PORT);
             }catch (IOException e){
                 e.printStackTrace();
             }
-            while (true) {
-                try {
-                    Socket socket = serverSocket.accept();
-                    new CommunicationThread(socket).start();
 
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "could not connect to server!");
-                    Log.e(LOG_TAG, e.getMessage());
-                    e.printStackTrace();
-                }
+            try {
+                clientSocket = serverSocket.accept();
+                new CommunicationThread().start();
+
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "could not connect to server!");
+                Log.e(LOG_TAG, e.getMessage());
+                e.printStackTrace();
             }
         }
     }
 
     class CommunicationThread extends Thread{
-        Socket socket;
         BufferedReader in;
 
-        public CommunicationThread(Socket socket){
-            this.socket = socket;
+        public CommunicationThread(){
             try {
-                in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -91,7 +120,7 @@ public class ChatActivity extends Activity {
         @Override
         public void run() {
             super.run();
-            String connectionMessage = "Connected with " + socket.getInetAddress().getHostAddress() + "\n";
+            String connectionMessage = "Connected with " + clientSocket.getInetAddress().getHostAddress() + "\n";
             messageHandler.post(new UpdateUIMessage(connectionMessage));
             String read;
             try {
@@ -133,10 +162,14 @@ public class ChatActivity extends Activity {
             try {
                 InetAddress serverAddr = InetAddress.getByName(serverIP);
                 clientSocket = new Socket(serverAddr, serverPort);
+                new CommunicationThread().start();
             }catch (Exception e){
                 e.printStackTrace();
+                messageHandler.post(new UpdateUIMessage("could not connect!"));
             }
+
         }
+
     }
 
     public void sendMessage(View view){
@@ -162,8 +195,20 @@ public class ChatActivity extends Activity {
     public void connectToHost(View view){
         EditText et = (EditText) findViewById(R.id.ip_edit);
         String ip = et.getText().toString();
-        new ClientThread(ip, 10001).start();
+        new ClientThread(ip, PORT).start();
     }
+
+    private Socket connectToSocket(String ip, int port){
+        Socket socket = null;
+        try {
+            InetAddress serverAddr = InetAddress.getByName(ip);
+            socket = new Socket(serverAddr, port);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return socket;
+    }
+
 }
 
 
