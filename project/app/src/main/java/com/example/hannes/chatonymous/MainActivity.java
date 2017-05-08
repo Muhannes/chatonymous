@@ -19,5 +19,11 @@ public class MainActivity extends Activity {
         Intent chatIntent = new Intent(this, ChatActivity.class);
         startActivity(chatIntent);
     }
+
+    public void openMaps(View view){
+        Intent mapsIntent = new Intent(this, MapsActivity.class);
+        startActivity(mapsIntent);
+    }
+
 }
 
