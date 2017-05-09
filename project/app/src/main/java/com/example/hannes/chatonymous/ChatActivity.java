@@ -17,7 +17,6 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * Created by hannes on 5/7/17.
@@ -27,7 +26,6 @@ public class ChatActivity extends Activity {
     static final String LOG_TAG = "ChatActivity";
     ServerSocket serverSocket;
     Socket clientSocket;
-    PrintWriter out;
     Handler messageHandler;
     static final int PORT = 10001;
     static final String SERVER_IP = "10.0.0.6";
@@ -39,7 +37,6 @@ public class ChatActivity extends Activity {
         setContentView(R.layout.activity_chat);
         messageBoard = (TextView) findViewById(R.id.message_board);
         messageHandler = new Handler();
-        //new ServerThread().start();
         new ConnectionThread().start();
 
 
@@ -66,10 +63,8 @@ public class ChatActivity extends Activity {
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                Log.d(LOG_TAG, InetAddress.getLocalHost().getHostAddress());
                 out.println(InetAddress.getLocalHost().getHostAddress());
                 ip = in.readLine();
-                Log.d(LOG_TAG, "|"+ip+"|");
             } catch (IOException e){
                 e.printStackTrace();
                 Log.e(LOG_TAG, "error in writing/reading.");
@@ -159,14 +154,7 @@ public class ChatActivity extends Activity {
         @Override
         public void run() {
             super.run();
-            try {
-                InetAddress serverAddr = InetAddress.getByName(serverIP);
-                clientSocket = new Socket(serverAddr, serverPort);
-                new CommunicationThread().start();
-            }catch (Exception e){
-                e.printStackTrace();
-                messageHandler.post(new UpdateUIMessage("could not connect!"));
-            }
+            clientSocket = connectToSocket(serverIP, serverPort);
 
         }
 
@@ -192,11 +180,6 @@ public class ChatActivity extends Activity {
         }
     }
 
-    public void connectToHost(View view){
-        EditText et = (EditText) findViewById(R.id.ip_edit);
-        String ip = et.getText().toString();
-        new ClientThread(ip, PORT).start();
-    }
 
     private Socket connectToSocket(String ip, int port){
         Socket socket = null;
@@ -205,6 +188,7 @@ public class ChatActivity extends Activity {
             socket = new Socket(serverAddr, port);
         }catch (Exception e){
             e.printStackTrace();
+            messageHandler.post(new UpdateUIMessage("could not connect!"));
         }
         return socket;
     }
