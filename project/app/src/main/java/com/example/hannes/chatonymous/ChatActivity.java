@@ -28,7 +28,7 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "10.0.0.6";
+    static final String SERVER_IP = "130.240.156.21"; //"10.0.0.6";
     TextView messageBoard;
 
     @Override
@@ -38,7 +38,6 @@ public class ChatActivity extends Activity {
         messageBoard = (TextView) findViewById(R.id.message_board);
         messageHandler = new Handler();
         new ConnectionThread().start();
-
 
     }
 
@@ -52,6 +51,11 @@ public class ChatActivity extends Activity {
         }
     }
 
+    /**
+     * Creates a connection to the server.
+     * If server found a match to chat with, start connection to them.
+     * otherwise, start serverThread and wait for match.
+     */
     class ConnectionThread extends Thread {
         Socket socket;
         @Override
@@ -63,7 +67,7 @@ public class ChatActivity extends Activity {
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                out.println(InetAddress.getLocalHost().getHostAddress());
+                out.println("connect");
                 ip = in.readLine();
             } catch (IOException e){
                 e.printStackTrace();
@@ -79,6 +83,10 @@ public class ChatActivity extends Activity {
         }
     }
 
+    /**
+     * Listens for a connection.
+     * When found start a communicationThread.
+     */
     class ServerThread extends Thread{
         @Override
         public void run() {
@@ -94,13 +102,22 @@ public class ChatActivity extends Activity {
                 new CommunicationThread().start();
 
             } catch (IOException e) {
-                Log.e(LOG_TAG, "could not connect to server!");
-                Log.e(LOG_TAG, e.getMessage());
+                Log.d(LOG_TAG, "Waiting interrupted. " + e.getMessage());
+            }
+            try {
+                serverSocket.close();
+            }catch (IOException e){
                 e.printStackTrace();
             }
+
         }
+
     }
 
+    /**
+     * Listens for messages from "stranger", until connection is broken
+     * writes them on messageboard
+     */
     class CommunicationThread extends Thread{
         BufferedReader in;
 
@@ -120,19 +137,19 @@ public class ChatActivity extends Activity {
             String read;
             try {
                 while ((read = in.readLine()) != null){
-
-                    messageHandler.post(new UpdateUIMessage("stranger says: " + read + "\n"));
-
-
+                    messageHandler.post(new UpdateUIMessage("Stranger says: " + read + "\n"));
                 }
             }catch (IOException e){
                 Log.d(LOG_TAG, "Error when reading.");
                 e.printStackTrace();
             }
-            messageHandler.post(new UpdateUIMessage("Stranger left..."));
+            messageHandler.post(new UpdateUIMessage("Conversation finished.\n"));
         }
     }
 
+    /**
+     * updates the gui with a message on the messageboard.
+     */
     class UpdateUIMessage implements Runnable {
         String msg;
         public UpdateUIMessage(String msg){
@@ -144,6 +161,9 @@ public class ChatActivity extends Activity {
         }
     }
 
+    /**
+     * Thread that starts a connection to a socket.
+     */
     class ClientThread extends Thread {
         String serverIP;
         int serverPort;
@@ -164,6 +184,10 @@ public class ChatActivity extends Activity {
         new Thread(new sendMessageThread()).start();
     }
 
+    /**
+     * Sends a message to the currently connected clientSocket.
+     * The message is taken from the textedit.
+     */
     class sendMessageThread implements Runnable {
         @Override
         public void run() {
@@ -180,7 +204,13 @@ public class ChatActivity extends Activity {
         }
     }
 
-
+    /**
+     * returns a socket connected with the
+     * given ip and port.(Null if no connection could be made)
+     * @param ip
+     * @param port
+     * @return
+     */
     private Socket connectToSocket(String ip, int port){
         Socket socket = null;
         try {
@@ -191,6 +221,82 @@ public class ChatActivity extends Activity {
             messageHandler.post(new UpdateUIMessage("could not connect!"));
         }
         return socket;
+    }
+
+    /**
+     * returns to MainActivity
+     * @param view
+     */
+    public void stopChatting(View view){
+        finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        closeChat();
+    }
+
+    /**
+     * closes current chat(if open),
+     * starts searching for new one.
+     * @param view
+     */
+    public void findNewMatch(View view){
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                closeChat(); //TODO: Does not finish before new chat is opened...
+
+                new ConnectionThread().start();
+            }
+        };
+        new Thread(r).start();
+
+    }
+
+    private void closeChat(){
+        if (clientSocket != null && !clientSocket.isClosed()){
+            try {
+                clientSocket.close();
+            }catch (IOException e){
+                e.printStackTrace();
+                Log.d(LOG_TAG, "error when closing socket.");
+            }
+        }else if (serverSocket != null && !serverSocket.isClosed()){
+            try {
+                serverSocket.close();
+            }catch (IOException e){
+                e.printStackTrace();
+                Log.d(LOG_TAG, "error when closing socket.");
+            }
+            Thread t = new Thread(new RemoveFromQueue());
+            t.start();
+            try {
+                t.join();
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+
+
+    class RemoveFromQueue implements Runnable {
+        @Override
+        public void run() {
+            Socket socket = connectToSocket(SERVER_IP, PORT);
+
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                out.println("disconnect");
+            } catch (IOException e){
+                e.printStackTrace();
+                Log.e(LOG_TAG, "error in leaving queue.");
+            }
+        }
     }
 
 }

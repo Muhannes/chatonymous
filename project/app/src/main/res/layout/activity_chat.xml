@@ -5,6 +5,29 @@
               android:orientation="vertical">
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.97"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/stop_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="stopChatting"
+            android:text="Stop"/>
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="findNewMatch"
+            android:text="Next"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/message_board"
         android:layout_width="match_parent"
@@ -32,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Button"/>
+            android:text="Send"/>
     </LinearLayout>
 
 </LinearLayout>

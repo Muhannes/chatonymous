@@ -15,12 +15,12 @@ public class MainActivity extends Activity {
 
     }
 
-    public void startChatting(View view){
+    public void startChatting(View view) {
         Intent chatIntent = new Intent(this, ChatActivity.class);
         startActivity(chatIntent);
     }
 
-    public void openMaps(View view){
+    public void openMaps(View view) {
         Intent mapsIntent = new Intent(this, MapsActivity.class);
         startActivity(mapsIntent);
     }
