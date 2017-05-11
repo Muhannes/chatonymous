@@ -1,9 +1,12 @@
 package com.example.hannes.chatonymous;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -19,6 +22,8 @@ import java.util.Locale;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    LatLng userPoint;
+    MarkerOptions userMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +33,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        double[] userPos = getIntent().getDoubleArrayExtra("LOCATION");
+        Log.d("USER LAT: ", Double.toString(userPos[0]));
+        Log.d("USER LON:", Double.toString(userPos[1]));
+        userPoint = new LatLng(userPos[0], userPos[1]);
+        userMarker = new MarkerOptions().position(userPoint).title("USER LOCATION");
+
     }
 
 
@@ -43,6 +55,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.addMarker(userMarker);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(userPoint));
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
@@ -53,12 +67,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     List<Address> addresses = geo.getFromLocation(point.latitude, point.longitude, 1);
 
                     if (addresses.size() > 0) {
-                        String country=addresses.get(0).getCountryName();
+                        String region = addresses.get(0).getLocality();
+                        String country = addresses.get(0).getCountryName();
+                        Log.d("REGION",region);
+                        Log.d("Country",country);
+                        String markerText = country;
                         MarkerOptions marker = new MarkerOptions().position(
-                                new LatLng(point.latitude, point.longitude)).title(country);
+                                new LatLng(point.latitude, point.longitude)).title(markerText);
                         mMap.clear();
                         mMap.addMarker(marker);
+                        mMap.addMarker(userMarker);
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
+
+                        Intent intent = new Intent();
+                        intent.putExtra("reqPos", new double[]{
+                                point.latitude,
+                                point.longitude
+                        });
+                        setResult(RESULT_OK, intent);
+                        finish();
                     }
                 } catch(Exception e) {
                     //Toast.makeText(this, "No Location Name Found", 600).show();
