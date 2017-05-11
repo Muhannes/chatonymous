@@ -35,8 +35,8 @@ public class ChatActivity extends Activity {
     static final int PORT = 10001;
     static final String SERVER_IP = "130.240.156.21"; //"10.0.0.6";
     TextView messageBoard;
-    double altitude;
     double latitude;
+    double longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +45,9 @@ public class ChatActivity extends Activity {
         messageBoard = (TextView) findViewById(R.id.message_board);
         messageHandler = new Handler();
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
-        altitude = loc[0];
-        latitude = loc[1];
-        Log.d(LOG_TAG, altitude + " .... " + latitude);
+        latitude = loc[0];
+        longitude = loc[1];
+        Log.d(LOG_TAG, latitude + " ... " + longitude);
         new ConnectionThread().start();
 
 
