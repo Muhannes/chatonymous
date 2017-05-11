@@ -14,7 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback{
     static final String LOG_TAG = "MainActivity";
     private Location location;
     private static final int REQUESTCODE_LOCATION = 1;
@@ -67,7 +67,6 @@ public class MainActivity extends Activity {
                     android.Manifest.permission.ACCESS_FINE_LOCATION
             }, REQUESTCODE_LOCATION);
 
-            location = getLocation();
         }
 
         return location;
@@ -76,12 +75,15 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d(LOG_TAG, "callback Reached!");
         if (requestCode == REQUESTCODE_LOCATION){
-            Log.d(LOG_TAG, "Callback called!");
+            Log.d(LOG_TAG, "in if statement!");
             location = getLocation();
         }
     }
-    
+
+
+
     // For api min 23
     /*private Location getLocation(){
         Location location = null;
