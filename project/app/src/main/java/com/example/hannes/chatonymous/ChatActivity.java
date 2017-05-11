@@ -1,6 +1,10 @@
 package com.example.hannes.chatonymous;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -17,6 +21,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.jar.Manifest;
 
 /**
  * Created by hannes on 5/7/17.
@@ -30,6 +35,8 @@ public class ChatActivity extends Activity {
     static final int PORT = 10001;
     static final String SERVER_IP = "130.240.156.21"; //"10.0.0.6";
     TextView messageBoard;
+    double altitude;
+    double latitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +44,12 @@ public class ChatActivity extends Activity {
         setContentView(R.layout.activity_chat);
         messageBoard = (TextView) findViewById(R.id.message_board);
         messageHandler = new Handler();
+        double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
+        altitude = loc[0];
+        latitude = loc[1];
+        Log.d(LOG_TAG, altitude + " .... " + latitude);
         new ConnectionThread().start();
+
 
     }
 
@@ -50,6 +62,8 @@ public class ChatActivity extends Activity {
             e.printStackTrace();
         }
     }
+
+
 
     /**
      * Creates a connection to the server.
@@ -246,8 +260,14 @@ public class ChatActivity extends Activity {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                closeChat(); //TODO: Does not finish before new chat is opened...
-
+                Thread t = closeChat(); //TODO: Does not finish before new chat is opened...
+                if (t != null){
+                    try {
+                        t.join();
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
                 new ConnectionThread().start();
             }
         };
@@ -255,7 +275,7 @@ public class ChatActivity extends Activity {
 
     }
 
-    private void closeChat(){
+    private Thread closeChat(){
         if (clientSocket != null && !clientSocket.isClosed()){
             try {
                 clientSocket.close();
@@ -272,13 +292,10 @@ public class ChatActivity extends Activity {
             }
             Thread t = new Thread(new RemoveFromQueue());
             t.start();
-            try {
-                t.join();
-            }catch (InterruptedException e){
-                e.printStackTrace();
-            }
+            return t;
 
         }
+        return null;
 
     }
 

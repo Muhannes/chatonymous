@@ -62,7 +62,7 @@ public class ChatonymousServer {
       PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream())), true);
       String read = in.readLine(); //now assuming only one line!!
       System.out.println("Read: " + read);
-      //parsedRead = [phoneIP, action] (ex: [0.0.0.0, connect])
+      //parsedRead = [action, ...] (ex: [connect, ...])
       String[] parsedRead = read.split(" ");
 
       if (parsedRead[0].equals("connect")) {
