@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback{
     static final String LOG_TAG = "MainActivity";
@@ -67,15 +68,22 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if (isGPSEnabled){
-                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
-                Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
-            }else if (isNetworkEnabled){
-                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
-                Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
+            try {
+                if (isGPSEnabled){
+                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
+                    Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
+                }else if (isNetworkEnabled){
+                    location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
+                    Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
+                }
+            }catch (NullPointerException e){
+                Toast t = new Toast(this);
+                t.setText("Could not get location.\nTry enabling google GPS.");
+                e.printStackTrace();
             }
+
         }else {
             Log.d(LOG_TAG, "Location permission denied...");
             ActivityCompat.requestPermissions(this, new String[] {
@@ -83,7 +91,6 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
             }, REQUESTCODE_LOCATION);
 
         }
-
         return location;
     }
 
