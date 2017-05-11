@@ -33,7 +33,7 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "130.240.156.21"; //"10.0.0.6";
+    static final String SERVER_IP = "192.168.1.30"; //"130.240.156.21"; //"10.0.0.6";
     TextView messageBoard;
     double latitude;
     double longitude;
@@ -81,7 +81,7 @@ public class ChatActivity extends Activity {
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                out.println("connect");
+                out.println("connect " + latitude + " " + longitude);
                 ip = in.readLine();
             } catch (IOException e){
                 e.printStackTrace();
