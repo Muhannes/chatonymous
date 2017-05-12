@@ -34,7 +34,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        double[] userPos = getIntent().getDoubleArrayExtra("userSettings");
+        double[] userPos = getIntent().getDoubleArrayExtra("LOCATION");
         Log.d("USER LAT: ", Double.toString(userPos[0]));
         Log.d("USER LON:", Double.toString(userPos[1]));
         userPoint = new LatLng(userPos[0], userPos[1]);
