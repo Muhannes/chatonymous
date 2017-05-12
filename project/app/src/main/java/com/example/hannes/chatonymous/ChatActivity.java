@@ -33,7 +33,7 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "192.168.1.30"; //"130.240.156.21"; //"10.0.0.6";
+    static final String SERVER_IP = "34.223.250.25"; //"10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
     TextView messageBoard;
     double latitude;
     double longitude;
@@ -189,7 +189,7 @@ public class ChatActivity extends Activity {
         public void run() {
             super.run();
             clientSocket = connectToSocket(serverIP, serverPort);
-
+            new CommunicationThread().start();
         }
 
     }
@@ -260,7 +260,7 @@ public class ChatActivity extends Activity {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                Thread t = closeChat(); //TODO: Does not finish before new chat is opened...
+                Thread t = closeChat();
                 if (t != null){
                     try {
                         t.join();
