@@ -15,23 +15,4 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Button"/>
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="openMaps"
-        android:text="Map"/>
-
-    <Button
-        android:id="@+id/start_chatting_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="startChatting"
-        android:text="Start Chatting"/>
 </LinearLayout>

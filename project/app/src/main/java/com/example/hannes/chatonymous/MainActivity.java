@@ -1,7 +1,5 @@
 package com.example.hannes.chatonymous;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -45,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         switch (item.getItemId()) {
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 return true;
 
             default:
