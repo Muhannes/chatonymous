@@ -8,6 +8,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -33,7 +35,7 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "192.168.1.30"; //"130.240.156.21"; //"10.0.0.6";
+    static final String SERVER_IP = "10.0.0.6"; //"192.168.1.30"; //"130.240.156.21"; //
     TextView messageBoard;
     double latitude;
     double longitude;
@@ -51,6 +53,13 @@ public class ChatActivity extends Activity {
         new ConnectionThread().start();
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar_menu, menu);
+        return true;
     }
 
     @Override
