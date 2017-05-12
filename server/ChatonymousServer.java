@@ -56,8 +56,9 @@ public class ChatonymousServer {
     // try taking out the "throws IOException" and compiling, // the compiler will tell us we need to deal with this!
     private void handleClient(Socket s) throws IOException {
       // print out client's address
-      String phoneIP = s.getInetAddress().getHostAddress();
-      System.out.println("Connection from " + phoneIP); // Set up streams
+      String remoteIP = s.getInetAddress().getHostAddress();
+      String remotePort = Integer.toString(s.getPort());
+      System.out.println("Connection from " + remoteIP + "/ " + remotePort);
 
       BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
       PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream())), true);
@@ -67,19 +68,24 @@ public class ChatonymousServer {
       String[] parsedRead = read.split(" ");
 
       if (parsedRead[0].equals("connect")) {
-        Client c = new Client(phoneIP, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]));
+        Client c = new Client(remoteIP, remotePort, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]));
         Client cMatch = findMatch(c);
         if (cMatch != null) { //Match is found, send back ip to which it should connect to.
-          clients.remove(cMatch); //Should be changed to take based on location
-          out.println(cMatch.getIP());
+          clients.remove(cMatch);
+          /*if (c.getRemoteIP().equals(cMatch.getRemoteIP())) {
+            out.println(cMatch.getLocalIP());
+          }else {
+            out.println(cMatch.getRemoteIP());
+          }*/
+          out.println(cMatch.getRemoteIP() + " " + cMatch.getRemotePort());
           System.out.println("found match!");
         }else { // No match is found, add self to queue.
           clients.add(c); //s.getInetAddress().getHostAddress()
           System.out.println("Found no match, adding to queue...");
         }
       }else if (parsedRead[0].equals("disconnect")) { // Leave queue.
-        if(clients.remove(new Client(phoneIP))){
-          System.out.println(phoneIP + " was removed from queue.");
+        if(clients.remove(new Client(remoteIP))){
+          System.out.println(remoteIP + " was removed from queue.");
         }
       }
 

@@ -1,27 +1,33 @@
 
 public class Client{
-  String ip;
+  String remoteIP;
+  String remotePort;
   double latitude;
   double longitude;
 
-  public Client(String ip, double latitude, double longitude){
-      this.ip = ip;
+  public Client(String remoteIP, String remotePort, double latitude, double longitude){
+      this.remoteIP = remoteIP;
+      this.remotePort = remotePort;
       this.latitude = latitude;
       this.longitude = longitude;
   }
 
-  public Client(String ip){ //only for disconnecting
-    this.ip = ip;
+  public Client(String remoteIP){ //only for disconnecting
+    this.remoteIP = remoteIP;
   }
 
-  public String getIP(){
-    return ip;
+  public String getRemoteIP(){
+    return remoteIP;
+  }
+
+  public String getRemotePort(){
+    return remotePort;
   }
 
 
   public boolean equals(Object o){
     Client c = (Client) o;
-    if (ip.equals(c.getIP())) {
+    if (remoteIP.equals(c.getRemoteIP())) {
       return true;
     }else {
       return false;

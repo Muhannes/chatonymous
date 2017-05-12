@@ -35,7 +35,7 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "34.223.250.25"; //"10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
+    static final String SERVER_IP = "10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
     TextView messageBoard;
     double latitude;
     double longitude;
@@ -86,21 +86,25 @@ public class ChatActivity extends Activity {
             super.run();
             String ip = null;
             socket = connectToSocket(SERVER_IP, PORT);
+            int localPort = socket.getLocalPort();
 
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
                 out.println("connect " + latitude + " " + longitude);
                 ip = in.readLine();
+                socket.close();
             } catch (IOException e){
                 e.printStackTrace();
                 Log.e(LOG_TAG, "error in writing/reading.");
             }
+
             if (ip != null){
                 Log.d(LOG_TAG, "got connection address!");
-                new ClientThread(ip, PORT).start();
+                String[] ips = ip.split(" ");
+                new ClientThread(ips[0], Integer.parseInt(ips[1])).start();
             }else {
-                new ServerThread().start();
+                new ServerThread(localPort).start();
                 Log.d(LOG_TAG, "Added to queue, wating for connection...");
             }
         }
@@ -111,16 +115,21 @@ public class ChatActivity extends Activity {
      * When found start a communicationThread.
      */
     class ServerThread extends Thread{
+        int serverPort;
+        public ServerThread(int port){
+            this.serverPort = port;
+        }
         @Override
         public void run() {
             super.run();
             try {
-                serverSocket = new ServerSocket(PORT);
+                serverSocket = new ServerSocket(serverPort);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
             try {
+                Log.d(LOG_TAG, "listening on port: " + serverPort);
                 clientSocket = serverSocket.accept();
                 new CommunicationThread().start();
 
@@ -188,16 +197,25 @@ public class ChatActivity extends Activity {
      * Thread that starts a connection to a socket.
      */
     class ClientThread extends Thread {
-        String serverIP;
-        int serverPort;
-        public ClientThread(String serverIP, int serverPort){
-            this.serverIP = serverIP;
-            this.serverPort = serverPort;
+        String ip;
+        int port;
+        public ClientThread(String ip, int port){
+            this.ip = ip;
+            this.port = port;
         }
         @Override
         public void run() {
             super.run();
-            clientSocket = connectToSocket(serverIP, serverPort);
+            Log.d(LOG_TAG, "trying to connect to: " + ip + ":" + port);
+            try {
+                InetAddress addr = InetAddress.getByName(ip);
+                clientSocket = new Socket(addr, port);
+            }catch (Exception e){
+                e.printStackTrace();
+                messageHandler.post(new UpdateUIMessage("could not connect!"));
+            }
+
+            //clientSocket = connectToSocket(....);
             new CommunicationThread().start();
         }
 

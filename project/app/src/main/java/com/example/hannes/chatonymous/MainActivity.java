@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     static final String LOG_TAG = "MainActivity";
@@ -60,20 +61,29 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     public void startChatting(View view) {
         Intent chatIntent = new Intent(this, ChatActivity.class);
-        chatIntent.putExtra("LOCATION", new double[]{
-                location.getLatitude(),
-                location.getLongitude()
-        });
+        setLocation(chatIntent);
+
         startActivity(chatIntent);
     }
 
     public void openMaps(View view) {
         Intent mapsIntent = new Intent(this, MapsActivity.class);
-        mapsIntent.putExtra("LOCATION", new double[]{
-                location.getLatitude(),
-                location.getLongitude()
-        });
+        setLocation(mapsIntent);
         startActivityForResult(mapsIntent, USER_REQUESTED_LOCATION);
+    }
+
+    private void setLocation(Intent intent){
+        if (location != null){
+            intent.putExtra("LOCATION", new double[]{
+                    location.getLatitude(),
+                    location.getLongitude()
+            });
+        }else { //default professorsvägen
+            intent.putExtra("LOCATION", new double[]{
+                    65.61954811,
+                    22.1518592
+            });
+        }
     }
 
     @Override
@@ -99,15 +109,21 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if (isGPSEnabled){
-                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
-                Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
-            }else if (isNetworkEnabled){
-                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
-                Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
+            try {
+                if (isGPSEnabled){
+                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
+                    Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
+                }else if (isNetworkEnabled){
+                    location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
+                    Log.d(LOG_TAG, "Longitude: " + location.getLongitude());
+                }
+            }catch (NullPointerException e){
+                Toast t = Toast.makeText(this, "GPS is disabled.\nEnable in settings.", Toast.LENGTH_LONG);
+                t.show();
             }
+
         }else {
             Log.d(LOG_TAG, "Location permission denied...");
             ActivityCompat.requestPermissions(this, new String[] {
