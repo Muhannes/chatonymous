@@ -19,9 +19,10 @@ import android.view.View;
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     static final String LOG_TAG = "MainActivity";
     private Location location;
+    private double[] userSettings;
     private static final int REQUESTCODE_LOCATION = 1;
     private static final int USER_REQUESTED_LOCATION = 1;
-
+    private static final int USER_REQUESTED_RANGE = 2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         location = getLocation();
+        userSettings = new double[1];
+        userSettings[0] = 15;
 
     }
 
@@ -44,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent);
+                settingsIntent.putExtra("userSettings", userSettings);
+                startActivityForResult(settingsIntent, USER_REQUESTED_RANGE);
                 return true;
 
             default:
@@ -76,13 +80,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == USER_REQUESTED_LOCATION) {
+        if (requestCode == USER_REQUESTED_LOCATION && resultCode == RESULT_OK) {
             // Make sure the request was successful
-            if (resultCode == RESULT_OK) {
-                double[] reqPos = data.getDoubleArrayExtra("reqPos");
-                Log.d("MAPS RETURN LAT", Double.toString(reqPos[0]));
-                Log.d("MAPS RETURN LON", Double.toString(reqPos[1]));
-            }
+            double[] reqPos = data.getDoubleArrayExtra("reqPos");
+            Log.d("MAPS RETURN LAT", Double.toString(reqPos[0]));
+            Log.d("MAPS RETURN LON", Double.toString(reqPos[1]));
+        }
+        else if (requestCode == USER_REQUESTED_RANGE && resultCode == RESULT_OK) {
+            double[] settingsData = data.getDoubleArrayExtra("settingsData");
+            Log.d("Settings Return", Double.toString(settingsData[0]));
         }
     }
 
