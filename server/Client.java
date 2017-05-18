@@ -6,7 +6,6 @@ public class Client{
   BufferedReader in;
   double latitude;
   double longitude;
-  //Changed!!!
   public Client(Socket s, BufferedReader in, double latitude, double longitude){
       this.socket = s;
       this.in = in;
@@ -14,9 +13,6 @@ public class Client{
       this.longitude = longitude;
   }
 
-  public Client(String remoteIP){ //only for disconnecting
-    //this.remoteIP = remoteIP;
-  }
 
   public BufferedReader getInStream(){
     return in;
@@ -25,7 +21,7 @@ public class Client{
   public Socket getSocket(){
     return socket;
   }
-  //Changed!!!
+
   public boolean equals(Object o){
     Client c = (Client) o;
     if (socket.equals(c.getSocket())) {

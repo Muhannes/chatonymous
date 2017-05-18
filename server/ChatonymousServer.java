@@ -10,8 +10,7 @@ import java.util.Iterator;
 
 public class ChatonymousServer {
   int port;
-  LinkedList<String> ips = new LinkedList<String>(); //TODO: Should be synchronized somehow...
-  LinkedList<Client> clients = new LinkedList<Client>();
+  LinkedList<Client> clients = new LinkedList<Client>();//TODO: Should be synchronized somehow...
   // main starts things rolling
   static public void main(String args[]) {
     if (args.length != 1) {
@@ -61,23 +60,22 @@ public class ChatonymousServer {
       System.out.println("Connection from " + remoteIP + "/ " + remotePort);
 
       BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-      //PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream())), true);
       String read = in.readLine(); //now assuming only one line!!
       System.out.println("Read: " + read);
-      //parsedRead = [action, latitude, longitude] (ex: [connect, 1.2141, 4.13141])
+      //parsedRead = [allowedDistance, latitude, longitude] (ex: [connect, 1.2141, 4.13141])
+      // TODO: allowedDistance is to be used in the future.
       String[] parsedRead = read.split(" ");
 
-      //if (parsedRead[0].equals("connect")) {
       Client c = new Client(s, in, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]));
       boolean cont = true;
 
-      while(cont){
+      while(cont){ // continue to search until active match is found, or no match is found.
         cont = false;
         Client cMatch = findMatch(c);
-        if (cMatch != null) { //Match is found, send back ip to which it should connect to.
+        if (cMatch != null) { //Match is found,
           clients.remove(cMatch);
           Socket s2 = cMatch.getSocket();
-          if (s2.isClosed()) {
+          if (s2.isClosed()) { //Check so it is active
             System.out.println("Found disconnected socket...");
             cont = true;
           }else {
@@ -92,31 +90,9 @@ public class ChatonymousServer {
           System.out.println("Found no match, adding to queue...");
         }
       }
-      /*}else if (parsedRead[0].equals("disconnect")) { // Leave queue.
-        if(clients.remove(new Client(remoteIP))){
-          System.out.println(remoteIP + " was removed from queue.");
-        }
-      }*/
 
-      /*if (parsedRead[0].equals("connect")) {
-        Client c = new Client(remoteIP, remotePort, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]));
-        Client cMatch = findMatch(c);
-        if (cMatch != null) { //Match is found, send back ip to which it should connect to.
-          clients.remove(cMatch);
-          out.println(cMatch.getRemoteIP() + " " + cMatch.getRemotePort());
-          System.out.println("found match!");
-        }else { // No match is found, add self to queue.
-          clients.add(c); //s.getInetAddress().getHostAddress()
-          System.out.println("Found no match, adding to queue...");
-        }
-      }else if (parsedRead[0].equals("disconnect")) { // Leave queue.
-        if(clients.remove(new Client(remoteIP))){
-          System.out.println(remoteIP + " was removed from queue.");
-        }
-      }*/
 
       System.out.println("strangers in queue: " + clients.size());
-      //s.close();
     }
   }
 
@@ -129,26 +105,6 @@ public class ChatonymousServer {
     return null;
   }
 
-  /*class CommunicationThread extends Thread {
-      PrintWriter out;
-      BufferedReader in;
-      public CommunicationThread(PrintWriter out, BufferedReader in){
-        this.out = out;
-        this.in = in;
-      }
-      @Override
-      public void run(){
-        String read;
-        try {
-          while(read = in.readLine() != null){
-            out.println(read);
-          }
-        }catch(IOException e){
-          e.printStackTrace();
-        }
-
-      }
-  }*/
 
   class CommunicationThread extends Thread {
       Socket sOut;
@@ -160,7 +116,7 @@ public class ChatonymousServer {
         this.sIn = cIn.getSocket();
         try {
           this.out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(sOut.getOutputStream())), true);
-          this.in = cIn.getInStream();//new BufferedReader(new InputStreamReader(sIn.getInputStream()));
+          this.in = cIn.getInStream();
           this.out.println("ready");
         }catch(IOException e){
           e.printStackTrace();
@@ -176,12 +132,11 @@ public class ChatonymousServer {
         }catch(IOException e){
           e.printStackTrace();
         }
-        try {
+        /*try {
           sOut.close();
           sIn.close();
         }catch(IOException e){
-          e.printStackTrace();
-        }
+        }*/
 
       }
   }
