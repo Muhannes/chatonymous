@@ -33,6 +33,7 @@ public class ChatActivity extends Activity {
     TextView messageBoard;
     double latitude;
     double longitude;
+    int distance; // distance in km.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,8 @@ public class ChatActivity extends Activity {
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
         latitude = loc[0];
         longitude = loc[1];
+        double[] userSettings = getIntent().getDoubleArrayExtra("USER_SETTINGS");
+        distance = (int) userSettings[0];
         Log.d(LOG_TAG, latitude + " ... " + longitude);
         new ConnectionThread().start();
 
@@ -125,7 +128,7 @@ public class ChatActivity extends Activity {
                 InetAddress addr = InetAddress.getByName(ip);
                 clientSocket = new Socket(addr, port);
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
-                out.println("connect " + latitude + " " + longitude);
+                out.println(distance + " " + latitude + " " + longitude);
             }catch (Exception e){
                 e.printStackTrace();
                 messageHandler.post(new UpdateUIMessage("could not connect!"));

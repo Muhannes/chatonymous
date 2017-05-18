@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public void startChatting(View view) {
         Intent chatIntent = new Intent(this, ChatActivity.class);
         setLocation(chatIntent);
-
+        chatIntent.putExtra("USER_SETTINGS", userSettings);
         startActivity(chatIntent);
     }
 
