@@ -1,33 +1,34 @@
+import java.net.*; // need this for InetAddress, Socket, ServerSocket
+import java.io.BufferedReader;
 
 public class Client{
-  String remoteIP;
-  String remotePort;
+  Socket socket;
+  BufferedReader in;
   double latitude;
   double longitude;
-
-  public Client(String remoteIP, String remotePort, double latitude, double longitude){
-      this.remoteIP = remoteIP;
-      this.remotePort = remotePort;
+  //Changed!!!
+  public Client(Socket s, BufferedReader in, double latitude, double longitude){
+      this.socket = s;
+      this.in = in;
       this.latitude = latitude;
       this.longitude = longitude;
   }
 
   public Client(String remoteIP){ //only for disconnecting
-    this.remoteIP = remoteIP;
+    //this.remoteIP = remoteIP;
   }
 
-  public String getRemoteIP(){
-    return remoteIP;
+  public BufferedReader getInStream(){
+    return in;
   }
 
-  public String getRemotePort(){
-    return remotePort;
+  public Socket getSocket(){
+    return socket;
   }
-
-
+  //Changed!!!
   public boolean equals(Object o){
     Client c = (Client) o;
-    if (remoteIP.equals(c.getRemoteIP())) {
+    if (socket.equals(c.getSocket())) {
       return true;
     }else {
       return false;
