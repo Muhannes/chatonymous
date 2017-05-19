@@ -1,13 +1,19 @@
 package com.example.hannes.chatonymous;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -26,11 +32,14 @@ import java.net.Socket;
 
 public class ChatActivity extends Activity {
     static final String LOG_TAG = "ChatActivity";
+    static final int COLOR_THIS = Color.CYAN;
+    static final int COLOR_STRANGER = Color.GRAY;
+    static final int COLOR_CPU = Color.YELLOW;
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
     static final String SERVER_IP = "34.223.250.25"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
-    TextView messageBoard;
+    LinearLayout messageBoard;
     double latitude;
     double longitude;
     int distance; // distance in km.
@@ -39,13 +48,13 @@ public class ChatActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        messageBoard = (TextView) findViewById(R.id.message_board);
+        messageBoard = (LinearLayout) findViewById(R.id.message_board);
         messageHandler = new Handler();
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
         latitude = loc[0];
         longitude = loc[1];
-        double[] userSettings = getIntent().getDoubleArrayExtra("USER_SETTINGS");
-        distance = (int) userSettings[0];
+        SharedPreferences sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
+        distance = sharedpreferences.getInt("userRange", 10);
         Log.d(LOG_TAG, latitude + " ... " + longitude);
         new ConnectionThread().start();
 
@@ -77,22 +86,23 @@ public class ChatActivity extends Activity {
         @Override
         public void run() {
             super.run();
-            String connectionMessage = "Connected with " + clientSocket.getInetAddress().getHostAddress() + "\n";
-            messageHandler.post(new UpdateUIMessage(connectionMessage));
+            String connectionMessage = "Connected with server.";
+            messageHandler.post(new UpdateUIMessage(connectionMessage, COLOR_CPU));
             String read;
             try {
                 String readyMsg = in.readLine();
                 Log.d(LOG_TAG, readyMsg);
                 if(readyMsg.equals("ready")) {
+                    //TODO: make variable to make writing OK!
                     while ((read = in.readLine()) != null) {
-                        messageHandler.post(new UpdateUIMessage("Stranger says: " + read + "\n"));
+                        messageHandler.post(new UpdateUIMessage(read, COLOR_STRANGER));
                     }
                 }
             }catch (IOException e){
                 Log.d(LOG_TAG, "Error when reading.");
                 e.printStackTrace();
             }
-            messageHandler.post(new UpdateUIMessage("Conversation finished.\n"));
+            messageHandler.post(new UpdateUIMessage("Conversation finished.", COLOR_CPU));
         }
     }
 
@@ -101,12 +111,14 @@ public class ChatActivity extends Activity {
      */
     class UpdateUIMessage implements Runnable {
         String msg;
-        public UpdateUIMessage(String msg){
+        int bgColor;
+        public UpdateUIMessage(String msg, int backgroundColor){
             this.msg = msg;
+            this.bgColor = backgroundColor;
         }
         @Override
         public void run() {
-            messageBoard.append(msg);
+            messageBoard.addView(createMessageView(msg, bgColor));
         }
     }
 
@@ -129,12 +141,13 @@ public class ChatActivity extends Activity {
                 clientSocket = new Socket(addr, port);
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
                 out.println(distance + " " + latitude + " " + longitude);
+                new CommunicationThread().start();
             }catch (Exception e){
                 e.printStackTrace();
-                messageHandler.post(new UpdateUIMessage("could not connect!"));
+                messageHandler.post(new UpdateUIMessage("could not connect!", COLOR_CPU));
             }
 
-            new CommunicationThread().start();
+
         }
 
     }
@@ -155,32 +168,15 @@ public class ChatActivity extends Activity {
             try {
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
                 out.println(msg);
+                messageHandler.post(new UpdateUIMessage(msg, COLOR_THIS));
             }catch (IOException e){
-                messageHandler.post(new UpdateUIMessage("Message could not be sent!"));
+                messageHandler.post(new UpdateUIMessage("Message could not be sent!", COLOR_CPU));
                 Log.d(LOG_TAG, "Error when sending message!");
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * returns a socket connected with the
-     * given ip and port.(Null if no connection could be made)
-     * @param ip
-     * @param port
-     * @return
-     */
-    private Socket connectToSocket(String ip, int port){
-        Socket socket = null;
-        try {
-            InetAddress serverAddr = InetAddress.getByName(ip);
-            socket = new Socket(serverAddr, port);
-        }catch (Exception e){
-            e.printStackTrace();
-            messageHandler.post(new UpdateUIMessage("could not connect!"));
-        }
-        return socket;
-    }
 
     /**
      * returns to MainActivity
@@ -202,15 +198,9 @@ public class ChatActivity extends Activity {
      * @param view
      */
     public void findNewMatch(View view){
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                closeChat();
-                new ConnectionThread().start();
-            }
-        };
-        new Thread(r).start();
-
+        messageBoard.removeAllViews();
+        closeChat();
+        new ConnectionThread().start();
     }
 
     private void closeChat(){
@@ -225,6 +215,13 @@ public class ChatActivity extends Activity {
 
     }
 
+    private TextView createMessageView(String msg, int backgroundColor){
+        TextView tV = new TextView(this);
+        tV.setText(msg);
+        tV.setBackgroundColor(backgroundColor);
+        tV.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return tV;
+    }
 
 
 }

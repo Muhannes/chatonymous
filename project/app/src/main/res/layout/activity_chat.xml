@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent" android:layout_height="fill_parent"
               android:weightSum="1"
-              android:orientation="vertical"
-                android:background="@mipmap/questionmark_background">
+              android:orientation="vertical">
 
 
     <LinearLayout
@@ -29,12 +28,19 @@
             android:text="Next"/>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/message_board"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.95"
-        android:text="Messages:\n"/>
+        android:layout_height="match_parent"
+        android:layout_weight="0.95">
+
+        <LinearLayout
+            android:id="@+id/message_board"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,7 +52,7 @@
             android:id="@+id/message_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.5"
             android:ems="10"
             android:inputType="textMultiLine"/>
 

@@ -132,11 +132,10 @@ public class ChatonymousServer {
         }catch(IOException e){
           e.printStackTrace();
         }
-        /*try {
+        try {
           sOut.close();
-          sIn.close();
         }catch(IOException e){
-        }*/
+        }
 
       }
   }
