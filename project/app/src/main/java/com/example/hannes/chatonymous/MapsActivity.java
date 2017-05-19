@@ -1,7 +1,10 @@
 package com.example.hannes.chatonymous;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v4.app.FragmentActivity;
@@ -22,8 +25,10 @@ import java.util.Locale;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    LatLng userPoint;
-    MarkerOptions userMarker;
+    private LatLng userPoint;
+    private MarkerOptions userMarker;
+    private LatLng savePoint;
+    private String markerText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,21 +78,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         String country = addresses.get(0).getCountryName();
                         Log.d("REGION",region);
                         Log.d("Country",country);
-                        String markerText = country;
+                        markerText = country;
                         MarkerOptions marker = new MarkerOptions().position(
                                 new LatLng(point.latitude, point.longitude)).title(markerText);
                         mMap.clear();
                         mMap.addMarker(marker);
                         mMap.addMarker(userMarker);
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
+                        savePoint = point;
+                        comfirm();
 
-                        Intent intent = new Intent();
-                        intent.putExtra("reqPos", new double[]{
-                                point.latitude,
-                                point.longitude
-                        });
-                        setResult(RESULT_OK, intent);
-                        finish();
+
                     }
                 } catch(Exception e) {
                     //Toast.makeText(this, "No Location Name Found", 600).show();
@@ -95,5 +96,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
     }
+
+    public void comfirm() {
+        new AlertDialog.Builder(this)
+                .setTitle("Location Chosen:")
+                .setMessage("Are you sure you want to use "+markerText+" for your chat location?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        //Toast.makeText(MainActivity.this, "Yaay", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent();
+                        intent.putExtra("reqPos", new double[]{
+                                savePoint.latitude,
+                                savePoint.longitude
+                        });
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
+
 }

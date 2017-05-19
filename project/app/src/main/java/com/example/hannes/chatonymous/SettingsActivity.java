@@ -1,6 +1,7 @@
 package com.example.hannes.chatonymous;
 
-import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,8 +14,7 @@ import android.widget.TextView;
 
 public class SettingsActivity extends AppCompatActivity {
     private int rangeValue;
-    private int defaultRange = 10;
-    private int userRange;
+    SharedPreferences sharedpreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,14 +26,9 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
-        double[] userSettings = getIntent().getDoubleArrayExtra("userSettings");
-        userRange = (int) userSettings[0];
-        Log.d("USER Range: ", Double.toString(userSettings[0]));
-        if(Double.toString(userRange) == "") {
-            rangeValue=defaultRange;
-        } else {
-            rangeValue=userRange;
-        }
+        sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
+        rangeValue = sharedpreferences.getInt("userRange", 10);
+
         SeekBar seekBar = (SeekBar)findViewById(R.id.range_seekBar);
         seekBar.setProgress(rangeValue);
         final TextView seekBarValue = (TextView)findViewById(R.id.seekbarvalue);
@@ -61,11 +56,10 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     protected void saveAndExit(View view) {
-        Intent intent = new Intent();
-        intent.putExtra("settingsData", new double[]{
-                rangeValue
-        });
-        setResult(RESULT_OK, intent);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putInt("userRange", rangeValue);
+        editor.commit();
+
         finish();
     }
 

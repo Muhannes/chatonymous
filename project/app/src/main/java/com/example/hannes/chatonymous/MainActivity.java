@@ -2,6 +2,7 @@ package com.example.hannes.chatonymous;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -20,10 +21,9 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     static final String LOG_TAG = "MainActivity";
     private Location location;
-    private double[] userSettings;
+    private int userRange;
     private static final int REQUESTCODE_LOCATION = 1;
     private static final int USER_REQUESTED_LOCATION = 1;
-    private static final int USER_REQUESTED_RANGE = 2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,8 +31,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         location = getLocation();
-        userSettings = new double[1];
-        userSettings[0] = 15;
+
+        SharedPreferences sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
+        userRange = sharedpreferences.getInt("userRange", 10);
 
     }
 
@@ -48,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                settingsIntent.putExtra("userSettings", userSettings);
-                startActivityForResult(settingsIntent, USER_REQUESTED_RANGE);
+                //settingsIntent.putExtra("userRange", userRange);
+                startActivity(settingsIntent);
                 return true;
 
             default:
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public void startChatting(View view) {
         Intent chatIntent = new Intent(this, ChatActivity.class);
         setLocation(chatIntent);
-        chatIntent.putExtra("USER_SETTINGS", userSettings);
+        chatIntent.putExtra("USER_SETTINGS", userRange);
         startActivity(chatIntent);
     }
 
@@ -95,10 +96,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             double[] reqPos = data.getDoubleArrayExtra("reqPos");
             Log.d("MAPS RETURN LAT", Double.toString(reqPos[0]));
             Log.d("MAPS RETURN LON", Double.toString(reqPos[1]));
-        }
-        else if (requestCode == USER_REQUESTED_RANGE && resultCode == RESULT_OK) {
-            double[] settingsData = data.getDoubleArrayExtra("settingsData");
-            Log.d("Settings Return", Double.toString(settingsData[0]));
         }
     }
 
