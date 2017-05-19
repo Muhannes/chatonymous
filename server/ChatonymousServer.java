@@ -127,6 +127,7 @@ public class ChatonymousServer {
         String read;
         try {
           while((read = in.readLine()) != null){
+            System.out.println(read);
             out.println(read);
           }
         }catch(IOException e){
