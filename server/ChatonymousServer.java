@@ -66,7 +66,7 @@ public class ChatonymousServer {
       // TODO: allowedDistance is to be used in the future.
       String[] parsedRead = read.split(" ");
 
-      Client c = new Client(s, in, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]));
+      Client c = new Client(s, in, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]), Double.parseDouble(parsedRead[3]), Double.parseDouble(parsedRead[4]));
       boolean cont = true;
 
       while(cont){ // continue to search until active match is found, or no match is found.
@@ -98,7 +98,7 @@ public class ChatonymousServer {
 
   private Client findMatch(Client client){
     for (Client c: clients ) {
-      if (c.distance(client) <= 10) { //TODO: Change to dynamic value
+      if (c.isMatch(client)) { 
         return c;
       }
     }

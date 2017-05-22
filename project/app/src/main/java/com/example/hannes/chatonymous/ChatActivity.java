@@ -40,8 +40,10 @@ public class ChatActivity extends Activity {
     static final int PORT = 10001;
     static final String SERVER_IP = "34.223.250.25"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
     LinearLayout messageBoard;
-    double latitude;
-    double longitude;
+    double latitude1;
+    double longitude1;
+    double latitude2;
+    double longitude2;
     int distance; // distance in km.
 
     @Override
@@ -51,11 +53,13 @@ public class ChatActivity extends Activity {
         messageBoard = (LinearLayout) findViewById(R.id.message_board);
         messageHandler = new Handler();
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
-        latitude = loc[0];
-        longitude = loc[1];
+        latitude1 = loc[0];
+        longitude1 = loc[1];
+        latitude2 = loc[2];
+        longitude2 = loc[3];
         SharedPreferences sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
         distance = sharedpreferences.getInt("userRange", 10);
-        Log.d(LOG_TAG, latitude + " ... " + longitude);
+        Log.d(LOG_TAG, latitude1 + " ... " + longitude1);
         new ConnectionThread().start();
 
     }
@@ -140,7 +144,7 @@ public class ChatActivity extends Activity {
                 InetAddress addr = InetAddress.getByName(ip);
                 clientSocket = new Socket(addr, port);
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
-                out.println(distance + " " + latitude + " " + longitude);
+                out.println(distance + " " + latitude1 + " " + longitude1 + " " + latitude2 + " " + longitude2);
                 new CommunicationThread().start();
             }catch (Exception e){
                 e.printStackTrace();
