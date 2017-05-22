@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.function.DoubleToLongFunction;
 
 /**
  * Created by hannes on 5/7/17.
@@ -63,10 +64,14 @@ public class ChatActivity extends Activity {
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
         latitude1 = loc[0];
         longitude1 = loc[1];
-        //latitude2 = loc[2];
-        //longitude2 = loc[3];
-        latitude2 = 1;
-        longitude2 = 2;
+
+        latitude2 = loc[2];
+        longitude2 = loc[3];
+        Log.d("LAT1", Double.toString(latitude1));
+        Log.d("LONG1", Double.toString(longitude1));
+        Log.d("LAT2", Double.toString(latitude2));
+        Log.d("LONG2", Double.toString(longitude2));
+
         SharedPreferences sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
         distance = sharedpreferences.getInt("userRange", 10);
         new ConnectionThread().start();

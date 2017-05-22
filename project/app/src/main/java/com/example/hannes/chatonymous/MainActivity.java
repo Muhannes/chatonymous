@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     static final String LOG_TAG = "MainActivity";
     private Location location;
     private int userRange;
+    private double[] userRequestedPosition;
     private static final int REQUESTCODE_LOCATION = 1;
     private static final int USER_REQUESTED_LOCATION = 1;
     @Override
@@ -74,13 +75,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void setLocation(Intent intent){
-        if (location != null){
+        if (location != null && userRequestedPosition != null) {
             intent.putExtra("LOCATION", new double[]{
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    userRequestedPosition[0],
+                    userRequestedPosition[1]
+            });
+        }else if (location != null) {
+            intent.putExtra("LOCATION", new double[]{
+                    location.getLatitude(),
+                    location.getLongitude(),
                     location.getLatitude(),
                     location.getLongitude()
             });
         }else { //default professorsvägen
             intent.putExtra("LOCATION", new double[]{
+                    65.61954811,
+                    22.1518592,
                     65.61954811,
                     22.1518592
             });
@@ -93,9 +105,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == USER_REQUESTED_LOCATION && resultCode == RESULT_OK) {
             // Make sure the request was successful
-            double[] reqPos = data.getDoubleArrayExtra("reqPos");
-            Log.d("MAPS RETURN LAT", Double.toString(reqPos[0]));
-            Log.d("MAPS RETURN LON", Double.toString(reqPos[1]));
+            userRequestedPosition = data.getDoubleArrayExtra("reqPos");
         }
     }
 
