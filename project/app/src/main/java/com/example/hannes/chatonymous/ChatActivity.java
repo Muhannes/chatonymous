@@ -20,7 +20,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -42,8 +45,9 @@ public class ChatActivity extends AppCompatActivity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
+    static final String SERVER_IP = "34.223.250.25"; //<--- for AWS server //"10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; //
     LinearLayout messageBoard;
+    ScrollView scrollView;
     double latitude1;
     double longitude1;
     double latitude2;
@@ -61,6 +65,7 @@ public class ChatActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         messageBoard = (LinearLayout) findViewById(R.id.message_board);
+        scrollView = (ScrollView) findViewById(R.id.message_board_scroll);
         messageHandler = new Handler();
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
         latitude1 = loc[0];
@@ -95,14 +100,13 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
             case android.R.id.home:
                 finish();
+
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
 
 
     /**
@@ -162,6 +166,7 @@ public class ChatActivity extends AppCompatActivity {
         public UpdateUIMessage(String msg, int backgroundColor){
             this.msg = msg;
             this.bgColor = backgroundColor;
+            scrollView.fullScroll(View.FOCUS_DOWN);
         }
         @Override
         public void run() {
@@ -208,7 +213,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void sendMessage(View view){
-        new Thread(new sendMessageThread()).start();
+        if(writeEnabled) { //If it is connected to another phone.
+            new Thread(new sendMessageThread()).start();
+        } else {
+            createToast("You need to find a chat-partner first");
+        }
     }
 
     /**
@@ -218,10 +227,9 @@ public class ChatActivity extends AppCompatActivity {
     class sendMessageThread implements Runnable {
         @Override
         public void run() {
-            if (writeEnabled) { //If it is connected to another phone.
-                EditText et = (EditText) findViewById(R.id.message_text);
-                String msg = et.getText().toString();
-
+            EditText et = (EditText) findViewById(R.id.message_text);
+            String msg = et.getText().toString();
+            if(msg.length()>0) {
                 try {
                     PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
                     out.println(msg);
@@ -232,7 +240,22 @@ public class ChatActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 messageHandler.post(new ClearEditText());
+            } else {
+                messageHandler.post(new ToastTread());
             }
+        }
+    }
+
+    public void createToast(String ttext) {
+        Toast t = Toast.makeText(this, ttext, Toast.LENGTH_LONG);
+        t.show();
+    }
+
+    class ToastTread implements Runnable {
+        @Override
+        public void run() {
+            Toast t = Toast.makeText(getApplicationContext(), "No Empty messages allowed.", Toast.LENGTH_LONG);
+            t.show();
         }
     }
 
@@ -294,8 +317,4 @@ public class ChatActivity extends AppCompatActivity {
         return tV;
     }
 
-
-
 }
-
-

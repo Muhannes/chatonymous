@@ -42,7 +42,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.95">
+        android:layout_weight="0.95"
+        android:id="@+id/message_board_scroll">
 
         <LinearLayout
             android:id="@+id/message_board"
