@@ -1,20 +1,16 @@
 package com.example.hannes.chatonymous;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,7 +107,7 @@ public class ChatActivity extends AppCompatActivity {
 
     /**
      * Listens for messages from "stranger", until connection is broken
-     * writes them on messageboard
+     * calls handler to write them on messageboard
      */
     class CommunicationThread extends Thread{
         BufferedReader in;
@@ -133,10 +129,10 @@ public class ChatActivity extends AppCompatActivity {
             try {
                 boolean stop = false;
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
-                while(!stop) {
+                while(!stop) { // reads until it gets "ready" from server, if it is not "ready", the server wants to know if we still here. answer.
                     String readyMsg = in.readLine();
                     Log.d(LOG_TAG, readyMsg);
-                    if (readyMsg.equals("ready")) {
+                    if (readyMsg.equals("ready")) { //If server writes "ready", we have got a match
                         stop = true;
                         messageHandler.post(new UpdateUIMessage("Stranger found, start chatting!", COLOR_CPU));
                         writeEnabled = true;
@@ -145,15 +141,16 @@ public class ChatActivity extends AppCompatActivity {
                         }
                         writeEnabled = false;
                     }else {
-                        out.println("Still here");
+                        out.println("Still here"); //Let the server know we are still here.
                     }
                 }
+                //if other end close the socket, we are notified they have left
+                messageHandler.post(new UpdateUIMessage("Conversation finished.", COLOR_CPU));
             }catch (IOException e){
                 writeEnabled = false;
                 Log.d(LOG_TAG, "Error when reading.");
                 e.printStackTrace();
             }
-            messageHandler.post(new UpdateUIMessage("Conversation finished.", COLOR_CPU));
         }
     }
 
@@ -228,9 +225,9 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void run() {
             EditText et = (EditText) findViewById(R.id.message_text);
-            String msg = et.getText().toString();
+            String msg = et.getText().toString(); //get text from input
             if(msg.length()>0) {
-                try {
+                try { //write message, and print it on the screen.
                     PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
                     out.println(msg);
                     messageHandler.post(new UpdateUIMessage(msg, COLOR_THIS));
@@ -298,6 +295,10 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    /* Creates and returns the View that will display a given message.
+        Sets background color of view to backgroundColor.
+        TODO: Set width to wrap_content and float left/right depending on color?
+      */
     private TextView createMessageView(String msg, int backgroundColor){
         TextView tV = new TextView(this);
         tV.setBackgroundResource(R.drawable.message_box);

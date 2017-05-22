@@ -61,6 +61,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    /*
+    starts chat intent.
+    for button "Start Chatting"
+     */
     public void startChatting(View view) {
         Intent chatIntent = new Intent(this, ChatActivity.class);
         setLocation(chatIntent);
@@ -68,28 +72,36 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         startActivity(chatIntent);
     }
 
+    /*
+    Starts Maps intent.
+    for button "Choose from map"
+     */
     public void openMaps(View view) {
         Intent mapsIntent = new Intent(this, MapsActivity.class);
         setLocation(mapsIntent);
         startActivityForResult(mapsIntent, USER_REQUESTED_LOCATION);
     }
 
+    /*
+        Puts two locations extra for intent.
+        one for where we are, and one for where we want to chat with someone.
+     */
     private void setLocation(Intent intent){
         if (location != null && userRequestedPosition != null) {
-            intent.putExtra("LOCATION", new double[]{
+            intent.putExtra("LOCATION", new double[]{ // if user has gps, and chosen a preferred location.
                     location.getLatitude(),
                     location.getLongitude(),
                     userRequestedPosition[0],
                     userRequestedPosition[1]
             });
-        }else if (location != null) {
+        }else if (location != null) { // if user has gps, but not chosen preferred location.
             intent.putExtra("LOCATION", new double[]{
                     location.getLatitude(),
                     location.getLongitude(),
                     location.getLatitude(),
                     location.getLongitude()
             });
-        }else { //default professorsvägen
+        }else { //default professorsvägen if gps is not enabled.
             intent.putExtra("LOCATION", new double[]{
                     65.61954811,
                     22.1518592,
@@ -109,6 +121,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    /*
+        Returns the current location.
+        Uses GPS, or Network based solutions.
+        Requests permissions if needed.
+     */
     private Location getLocation(){
         Location location = null;
 
@@ -146,41 +163,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d(LOG_TAG, "callback Reached!");
-        if (requestCode == REQUESTCODE_LOCATION){
-            Log.d(LOG_TAG, "in if statement!");
-            location = getLocation();
+        if (requestCode == REQUESTCODE_LOCATION){ // if permission for gps had to be requested.
+            location = getLocation();   // try getting location again.
         }
     }
 
 
-
-    // For api min 23
-    /*private Location getLocation(){
-        Location location = null;
-
-        if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if (isGPSEnabled){
-                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                Log.d(LOG_TAG, "Altitude: " + location.getAltitude());
-                Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
-            }else if (isNetworkEnabled){
-                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                Log.d(LOG_TAG, "Altitude: " + location.getAltitude());
-                Log.d(LOG_TAG, "Latitude: " + location.getLatitude());
-            }
-        }else {
-            Log.d(LOG_TAG, "Location permission denied...");
-            requestPermissions(new String[] {
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-            }, 1);
-            location = getLocation();
-        }
-
-        return location;
-    }*/
 
 }
 
