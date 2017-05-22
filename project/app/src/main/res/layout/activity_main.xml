@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/questionmark_background">
+    android:weightSum="1">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
@@ -16,22 +16,33 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/start_chatting_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button"/>
+        android:layout_weight="0.09"
+        android:onClick="startChatting"
+        android:text="Start Chatting"
+        android:background="@android:color/holo_blue_light"
+        android:layout_margin="1dp"
+        />
 
     <Button
         android:id="@+id/button3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="openMaps"
-        android:text="Map"/>
+        android:text="Map (Choose location for chat-partner)"
+        android:layout_weight="0.09"
+        android:background="@android:color/holo_blue_light"
+        android:layout_margin="1dp"
+        />
 
-    <Button
-        android:id="@+id/start_chatting_button"
+    <ImageView
+        android:id="@+id/imageView2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="startChatting"
-        android:text="Start Chatting"/>
+        android:layout_height="200dp"
+        android:background="@mipmap/questionmark_background"
+        android:layout_weight="0.76" />
+
+
 </LinearLayout>
