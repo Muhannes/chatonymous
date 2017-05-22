@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
@@ -15,9 +17,15 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -55,11 +63,12 @@ public class ChatActivity extends Activity {
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
         latitude1 = loc[0];
         longitude1 = loc[1];
-        latitude2 = loc[2];
-        longitude2 = loc[3];
+        //latitude2 = loc[2];
+        //longitude2 = loc[3];
+        latitude2 = 1;
+        longitude2 = 2;
         SharedPreferences sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
         distance = sharedpreferences.getInt("userRange", 10);
-        Log.d(LOG_TAG, latitude1 + " ... " + longitude1);
         new ConnectionThread().start();
 
     }
@@ -169,6 +178,7 @@ public class ChatActivity extends Activity {
         public void run() {
             EditText et = (EditText) findViewById(R.id.message_text);
             String msg = et.getText().toString();
+            et.setText("");
             try {
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
                 out.println(msg);
@@ -221,10 +231,53 @@ public class ChatActivity extends Activity {
 
     private TextView createMessageView(String msg, int backgroundColor){
         TextView tV = new TextView(this);
+        tV.setBackgroundResource(R.drawable.message_box);
+
+        GradientDrawable drawable = (GradientDrawable) tV.getBackground();
+        drawable.setColor(backgroundColor);
         tV.setText(msg);
-        tV.setBackgroundColor(backgroundColor);
-        tV.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        if (backgroundColor == COLOR_THIS){
+            llp.setMargins(100, 4,4,4);
+        }else if (backgroundColor == COLOR_STRANGER){
+            llp.setMargins(4,4,100,4);
+        }else {
+            llp.setMargins(4,4,4,4);
+        }
+        tV.setLayoutParams(llp);
         return tV;
+    }
+
+    public void saveConversation(String fileName){
+        //TODO: ...
+        String filePath = Environment.getExternalStorageDirectory().getPath() + "chatonymous/conversations/";
+        File outFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+        if (!outFile.exists()) {
+            //File does not exists
+            BufferedWriter bw = null;
+            try {
+                outFile.createNewFile();
+                bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile)));
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            int children = messageBoard.getChildCount();
+            String msg;
+            String outString = "";
+            int color;
+            for (int i = 0; i<children; i++){
+                TextView tV = (TextView) messageBoard.getChildAt(i);
+                msg = (String) tV.getText();
+                outString += msg;
+                //color = tV.getLayoutParams().
+                //if ()
+                //TODO: write to file
+            }
+        }else {
+            Toast t = Toast.makeText(this, "File with that name already exists.", Toast.LENGTH_LONG);
+            t.show();
+        }
+
     }
 
 
