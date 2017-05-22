@@ -76,9 +76,14 @@ public class ChatonymousServer {
           clients.remove(cMatch);
           Socket s2 = cMatch.getSocket();
           boolean disconnected = false;
+          String state = null;
           try {
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s2.getOutputStream())), true);
-            out.println("test");
+            out.println("check connection.");
+            state = cMatch.getInStream().readLine();
+            if (state == null) {
+              disconnected = true;
+            }
           }catch(IOException e){
             disconnected = true;
           }

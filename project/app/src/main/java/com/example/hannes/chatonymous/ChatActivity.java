@@ -128,6 +128,7 @@ public class ChatActivity extends AppCompatActivity {
             String read;
             try {
                 boolean stop = false;
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
                 while(!stop) {
                     String readyMsg = in.readLine();
                     Log.d(LOG_TAG, readyMsg);
@@ -139,6 +140,8 @@ public class ChatActivity extends AppCompatActivity {
                             messageHandler.post(new UpdateUIMessage(read, COLOR_STRANGER));
                         }
                         writeEnabled = false;
+                    }else {
+                        out.println("Still here");
                     }
                 }
             }catch (IOException e){
@@ -263,6 +266,7 @@ public class ChatActivity extends AppCompatActivity {
         if (clientSocket != null && !clientSocket.isClosed()){
             try {
                 clientSocket.close();
+                Log.d(LOG_TAG, "Closed socket.");
             }catch (IOException e){
                 e.printStackTrace();
                 Log.d(LOG_TAG, "error when closing socket.");
