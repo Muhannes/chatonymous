@@ -54,6 +54,7 @@ public class ChatActivity extends Activity {
     double latitude2;
     double longitude2;
     int distance; // distance in km.
+    boolean writeEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,10 +112,11 @@ public class ChatActivity extends Activity {
                 String readyMsg = in.readLine();
                 Log.d(LOG_TAG, readyMsg);
                 if(readyMsg.equals("ready")) {
-                    //TODO: make variable to make writing OK!
+                    writeEnabled = true;
                     while ((read = in.readLine()) != null) {
                         messageHandler.post(new UpdateUIMessage(read, COLOR_STRANGER));
                     }
+                    writeEnabled = false;
                 }
             }catch (IOException e){
                 Log.d(LOG_TAG, "Error when reading.");
@@ -137,6 +139,14 @@ public class ChatActivity extends Activity {
         @Override
         public void run() {
             messageBoard.addView(createMessageView(msg, bgColor));
+        }
+    }
+
+    class ClearEditText implements Runnable {
+        @Override
+        public void run() {
+            EditText et = (EditText) findViewById(R.id.message_text);
+            et.setText("");
         }
     }
 
@@ -181,17 +191,20 @@ public class ChatActivity extends Activity {
     class sendMessageThread implements Runnable {
         @Override
         public void run() {
-            EditText et = (EditText) findViewById(R.id.message_text);
-            String msg = et.getText().toString();
-            et.setText("");
-            try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
-                out.println(msg);
-                messageHandler.post(new UpdateUIMessage(msg, COLOR_THIS));
-            }catch (IOException e){
-                messageHandler.post(new UpdateUIMessage("Message could not be sent!", COLOR_CPU));
-                Log.d(LOG_TAG, "Error when sending message!");
-                e.printStackTrace();
+            if (writeEnabled) {
+                EditText et = (EditText) findViewById(R.id.message_text);
+                String msg = et.getText().toString();
+
+                try {
+                    PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
+                    out.println(msg);
+                    messageHandler.post(new UpdateUIMessage(msg, COLOR_THIS));
+                } catch (IOException e) {
+                    messageHandler.post(new UpdateUIMessage("Message could not be sent!", COLOR_CPU));
+                    Log.d(LOG_TAG, "Error when sending message!");
+                    e.printStackTrace();
+                }
+                messageHandler.post(new ClearEditText());
             }
         }
     }
