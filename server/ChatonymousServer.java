@@ -66,16 +66,23 @@ public class ChatonymousServer {
       // TODO: allowedDistance is to be used in the future.
       String[] parsedRead = read.split(" ");
 
-      Client c = new Client(s, in, Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]), Double.parseDouble(parsedRead[3]), Double.parseDouble(parsedRead[4]));
+      Client c = new Client(s, in, Integer.parseInt(parsedRead[0]), Double.parseDouble(parsedRead[1]), Double.parseDouble(parsedRead[2]), Double.parseDouble(parsedRead[3]), Double.parseDouble(parsedRead[4]));
       boolean cont = true;
 
       while(cont){ // continue to search until active match is found, or no match is found.
         cont = false;
         Client cMatch = findMatch(c);
-        if (cMatch != null) { //Match is found,
+        if (cMatch != null) { //Match is found
           clients.remove(cMatch);
           Socket s2 = cMatch.getSocket();
-          if (s2.isClosed()) { //Check so it is active
+          boolean disconnected = false;
+          try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s2.getOutputStream())), true);
+            out.println("test");
+          }catch(IOException e){
+            disconnected = true;
+          }
+          if (disconnected) { //Check so it is active
             System.out.println("Found disconnected socket...");
             cont = true;
           }else {
@@ -98,7 +105,7 @@ public class ChatonymousServer {
 
   private Client findMatch(Client client){
     for (Client c: clients ) {
-      if (c.isMatch(client)) { 
+      if (c.isMatch(client)) {
         return c;
       }
     }
@@ -130,7 +137,7 @@ public class ChatonymousServer {
             out.println(read);
           }
         }catch(IOException e){
-          e.printStackTrace();
+          System.out.println("Conversation finished!");
         }
         try {
           sOut.close();

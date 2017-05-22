@@ -17,9 +17,10 @@ public class Client{
       this.longitude1 = longitude;
   }
 
-  public Client(Socket s, BufferedReader in, double latitude1, double longitude1, double latitude2, double longitude2){
+  public Client(Socket s, BufferedReader in, int distance, double latitude1, double longitude1, double latitude2, double longitude2){
       this.socket = s;
       this.in = in;
+      this.acceptedDistance = distance;
       this.latitude1 = latitude1;
       this.longitude1 = longitude1;
       this.latitude2 = latitude2;
@@ -65,7 +66,7 @@ public class Client{
   }
 
   public boolean isMatch(Client c){
-    if (this.distance(c) < this.acceptedDistance) {
+    if (this.distance(c) <= this.acceptedDistance) {
       return true;
     }else if (c.distance(this) <= c.acceptedDistance) {
       return true;

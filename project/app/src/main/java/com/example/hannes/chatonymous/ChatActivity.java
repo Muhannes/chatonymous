@@ -17,23 +17,14 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.function.DoubleToLongFunction;
 
 /**
  * Created by hannes on 5/7/17.
@@ -47,7 +38,7 @@ public class ChatActivity extends Activity {
     Socket clientSocket;
     Handler messageHandler;
     static final int PORT = 10001;
-    static final String SERVER_IP = "34.223.250.25"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
+    static final String SERVER_IP = "10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; // "34.223.250.25"; <--- for AWS server
     LinearLayout messageBoard;
     double latitude1;
     double longitude1;
@@ -65,7 +56,6 @@ public class ChatActivity extends Activity {
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
         latitude1 = loc[0];
         longitude1 = loc[1];
-
         latitude2 = loc[2];
         longitude2 = loc[3];
         Log.d("LAT1", Double.toString(latitude1));
@@ -109,16 +99,22 @@ public class ChatActivity extends Activity {
             messageHandler.post(new UpdateUIMessage(connectionMessage, COLOR_CPU));
             String read;
             try {
-                String readyMsg = in.readLine();
-                Log.d(LOG_TAG, readyMsg);
-                if(readyMsg.equals("ready")) {
-                    writeEnabled = true;
-                    while ((read = in.readLine()) != null) {
-                        messageHandler.post(new UpdateUIMessage(read, COLOR_STRANGER));
+                boolean stop = false;
+                while(!stop) {
+                    String readyMsg = in.readLine();
+                    Log.d(LOG_TAG, readyMsg);
+                    if (readyMsg.equals("ready")) {
+                        stop = true;
+                        messageHandler.post(new UpdateUIMessage("Stranger found, start chatting!", COLOR_CPU));
+                        writeEnabled = true;
+                        while ((read = in.readLine()) != null) {
+                            messageHandler.post(new UpdateUIMessage(read, COLOR_STRANGER));
+                        }
+                        writeEnabled = false;
                     }
-                    writeEnabled = false;
                 }
             }catch (IOException e){
+                writeEnabled = false;
                 Log.d(LOG_TAG, "Error when reading.");
                 e.printStackTrace();
             }
@@ -191,7 +187,7 @@ public class ChatActivity extends Activity {
     class sendMessageThread implements Runnable {
         @Override
         public void run() {
-            if (writeEnabled) {
+            if (writeEnabled) { //If it is connected to another phone.
                 EditText et = (EditText) findViewById(R.id.message_text);
                 String msg = et.getText().toString();
 
@@ -266,37 +262,6 @@ public class ChatActivity extends Activity {
         return tV;
     }
 
-    public void saveConversation(String fileName){
-        //TODO: ...
-        String filePath = Environment.getExternalStorageDirectory().getPath() + "chatonymous/conversations/";
-        File outFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
-        if (!outFile.exists()) {
-            //File does not exists
-            BufferedWriter bw = null;
-            try {
-                outFile.createNewFile();
-                bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile)));
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-            int children = messageBoard.getChildCount();
-            String msg;
-            String outString = "";
-            int color;
-            for (int i = 0; i<children; i++){
-                TextView tV = (TextView) messageBoard.getChildAt(i);
-                msg = (String) tV.getText();
-                outString += msg;
-                //color = tV.getLayoutParams().
-                //if ()
-                //TODO: write to file
-            }
-        }else {
-            Toast t = Toast.makeText(this, "File with that name already exists.", Toast.LENGTH_LONG);
-            t.show();
-        }
-
-    }
 
 
 }
