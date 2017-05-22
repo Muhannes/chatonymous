@@ -3,15 +3,19 @@ package com.example.hannes.chatonymous;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -30,7 +34,7 @@ import java.net.Socket;
  * Created by hannes on 5/7/17.
  */
 
-public class ChatActivity extends Activity {
+public class ChatActivity extends AppCompatActivity {
     static final String LOG_TAG = "ChatActivity";
     static final int COLOR_THIS = Color.CYAN;
     static final int COLOR_STRANGER = Color.GRAY;
@@ -51,6 +55,11 @@ public class ChatActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         messageBoard = (LinearLayout) findViewById(R.id.message_board);
         messageHandler = new Handler();
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
@@ -69,12 +78,31 @@ public class ChatActivity extends Activity {
 
     }
 
-    @Override
+    @Override //toolbar
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbar_menu, menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
         return true;
     }
+    @Override //toolbar
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                // User chose the "Settings" item, show the app settings UI...
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                //settingsIntent.putExtra("userRange", userRange);
+                startActivity(settingsIntent);
+                return true;
+            case android.R.id.home:
+                finish();
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
 
 
     /**
