@@ -169,6 +169,14 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void run() {
             messageBoard.addView(createMessageView(msg, bgColor));
+            messageHandler.postDelayed(new AutoScrollDown(), 50); // scroll down when everything is done.
+        }
+
+    }
+
+    class AutoScrollDown implements Runnable {
+        @Override
+        public void run() {
             scrollView.fullScroll(View.FOCUS_DOWN);
         }
     }
