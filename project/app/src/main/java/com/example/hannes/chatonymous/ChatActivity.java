@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +43,7 @@ public class ChatActivity extends AppCompatActivity {
     Handler messageHandler;
     static final int PORT = 10001;
     static final String SERVER_IP = "34.223.250.25"; //<--- for AWS server //"10.0.0.6"; //"130.240.156.21"; //"10.0.0.6"; //
-    LinearLayout messageBoard;
+    RelativeLayout messageBoard;
     ScrollView scrollView;
     double latitude1;
     double longitude1;
@@ -50,6 +51,7 @@ public class ChatActivity extends AppCompatActivity {
     double longitude2;
     int distance; // distance in km.
     boolean writeEnabled = false;
+    TextView lastMessage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,7 @@ public class ChatActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        messageBoard = (LinearLayout) findViewById(R.id.message_board);
+        messageBoard = (RelativeLayout) findViewById(R.id.message_board);
         scrollView = (ScrollView) findViewById(R.id.message_board_scroll);
         messageHandler = new Handler();
         double[] loc = getIntent().getDoubleArrayExtra("LOCATION");
@@ -278,6 +280,7 @@ public class ChatActivity extends AppCompatActivity {
      */
     public void findNewMatch(View view){
         messageBoard.removeAllViews();
+        lastMessage = null;
         closeChat();
         new ConnectionThread().start();
     }
@@ -308,15 +311,23 @@ public class ChatActivity extends AppCompatActivity {
         tV.getBackground().setAlpha(128);
         tV.setTextColor(tV.getTextColors().withAlpha(255));
         tV.setText(msg);
-        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lp = null;
         if (backgroundColor == COLOR_THIS){
-            llp.setMargins(100, 4,4,4);
+            lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         }else if (backgroundColor == COLOR_STRANGER){
-            llp.setMargins(4,4,100,4);
+            lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         }else {
-            llp.setMargins(4,4,4,4);
+            lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-        tV.setLayoutParams(llp);
+        lp.setMargins(4,4,4,4);
+        if (lastMessage != null){
+            lp.addRule(RelativeLayout.BELOW, lastMessage.getId());
+        }
+        tV.setLayoutParams(lp);
+        lastMessage = tV;
+        lastMessage.setId(View.generateViewId());
         return tV;
     }
 
