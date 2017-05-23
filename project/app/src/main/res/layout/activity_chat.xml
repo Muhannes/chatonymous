@@ -10,10 +10,10 @@
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:background="@drawable/main_button"/>
 
 
     <LinearLayout
@@ -28,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="stopChatting"
-            android:text="Stop"/>
+            android:text="Stop"
+            android:background="@drawable/main_button"/>
 
         <Button
             android:id="@+id/next_button"
@@ -36,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="findNewMatch"
-            android:text="Next"/>
+            android:text="Next"
+            android:background="@drawable/main_button"/>
     </LinearLayout>
 
     <ScrollView
@@ -74,7 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Send"/>
+            android:text="Send"
+            android:background="@drawable/main_button"/>
     </LinearLayout>
 
 </LinearLayout>

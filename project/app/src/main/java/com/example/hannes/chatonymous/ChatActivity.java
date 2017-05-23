@@ -163,11 +163,11 @@ public class ChatActivity extends AppCompatActivity {
         public UpdateUIMessage(String msg, int backgroundColor){
             this.msg = msg;
             this.bgColor = backgroundColor;
-            scrollView.fullScroll(View.FOCUS_DOWN);
         }
         @Override
         public void run() {
             messageBoard.addView(createMessageView(msg, bgColor));
+            scrollView.fullScroll(View.FOCUS_DOWN);
         }
     }
 
@@ -305,6 +305,8 @@ public class ChatActivity extends AppCompatActivity {
 
         GradientDrawable drawable = (GradientDrawable) tV.getBackground();
         drawable.setColor(backgroundColor);
+        tV.getBackground().setAlpha(128);
+        tV.setTextColor(tV.getTextColors().withAlpha(255));
         tV.setText(msg);
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         if (backgroundColor == COLOR_THIS){
