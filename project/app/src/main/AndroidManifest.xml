@@ -14,9 +14,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/question_mark"
+        android:icon="@mipmap/globe"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/question_mark"
+        android:roundIcon="@mipmap/globe"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
