@@ -37,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //read the intent extra (user position) and add marker.
         double[] userPos = getIntent().getDoubleArrayExtra("LOCATION");
         Log.d("USER LAT: ", Double.toString(userPos[0]));
         Log.d("USER LON:", Double.toString(userPos[1]));
@@ -56,6 +57,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
+     *
+     *
+     * Add a marker where the users is located.
+     * And add a listner for clicks on map. Upon clicking add a marker and ask save and exit
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -72,6 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     List<Address> addresses = geo.getFromLocation(point.latitude, point.longitude, 1);
 
                     if (addresses.size() > 0) {
+                        //TODO: Set the markerText based on region text.
                         String region = addresses.get(0).getLocality();
                         String country = addresses.get(0).getCountryName();
                         Log.d("REGION",region);
@@ -89,7 +95,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     }
                 } catch(Exception e) {
-                    //Toast.makeText(this, "No Location Name Found", 600).show();
                 }
 
             }
@@ -97,6 +102,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    /*
+        creates a popup window for save and exit
+        Upon save send marker as intent extra to main.
+     */
     public void comfirm() {
         new AlertDialog.Builder(this)
                 .setTitle("Location Chosen:")

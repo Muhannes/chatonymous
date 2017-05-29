@@ -20,15 +20,18 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        //Add toolbar and its functions.
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
+        //get the sharedpreference (user range)
         sharedpreferences = getSharedPreferences("chatonymousSettings", Context.MODE_PRIVATE);
         rangeValue = sharedpreferences.getInt("userRange", 10);
 
+        //read and write seekbar value to userrange upon update.
         SeekBar seekBar = (SeekBar)findViewById(R.id.range_seekBar);
         seekBar.setProgress(rangeValue);
         final TextView seekBarValue = (TextView)findViewById(R.id.seekbarvalue);
@@ -55,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    //save and exit. Saving to sharedpref.
     protected void saveAndExit(View view) {
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putInt("userRange", rangeValue);
